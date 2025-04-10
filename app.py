@@ -96,7 +96,7 @@ if __name__ == "__main__":
     try:
         # Assign the instance to the global variable
         tdiq_phone_instance = TDIQPhone()
-        log.info("Application running. Waiting for signals (e.g., SIGTERM from systemctl stop)...")
+        log.info("We're up...")
 
         # Keep the main thread alive. signal.pause() waits efficiently for signals.
         while True:
