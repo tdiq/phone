@@ -60,7 +60,6 @@ class TDIQPhone:
         self.phone.handset.play_file("assets/dialogue/4-always-listening.wav")
 
     def on_hang_up_phone(self):
-        log.info("phone hung up")
         self.osc.send("/props/phone/hangup", 1)
 
     def on_start_msg(self, address, value):
