@@ -39,12 +39,9 @@ class OSCHandler:
             (self.listen_ip, self.listen_port), self._dispatcher
         )
         self._server_thread = None
-        listen_addr_display = "all interfaces" if self.listen_ip == "0.0.0.0" else self.listen_ip
-        log.debug("OSC Server configured to listen on {} (IP: {}), Port: {}".format(
-            listen_addr_display, self.listen_ip, self.listen_port))
 
         self._client = udp_client.SimpleUDPClient(self.send_ip, self.send_port)
-        print("OSC Client configured to send TO {}:{}".format(self.send_ip, self.send_port))
+        log.info("OSC Client configured to send TO {}:{}".format(self.send_ip, self.send_port))
 
     def subscribe(self, address, callback):
         """
@@ -97,7 +94,7 @@ class OSCHandler:
             except Exception as e:
                 print("Exception during server_close: {}".format(e))
             self._server_thread = None
-            print("OSC Server stopped.")
+            log.debug("OSC Server stopped.")
         else:
             print("OSC Server is not running or already stopped.")
 

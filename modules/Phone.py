@@ -42,15 +42,14 @@ class Phone:
         self.leftRing = gpiozero.OutputDevice(PIN_LEFT_RING)
         self.rightRing = gpiozero.OutputDevice(PIN_RIGHT_RING)
 
-        
-        # if not os.environ.get("SKIP_TEST"):
-        #     log.debug("Testing ringer...")
-        #     time.sleep(1)
-        #     self.single_ring()
-        #     log.debug("Testing handset...")
-        #     self.handset.set_volume(1)
-        #     self.handset.speak("Ready to work, captain")
-        #     self.handset.set_volume(0.75)
+        if not os.environ.get("SKIP_TEST"):
+            log.debug("Testing ringer...")
+            time.sleep(1)
+            self.single_ring()
+            log.debug("Testing handset...")
+            self.handset.set_volume(1)
+            self.handset.speak("Ready to work, captain")
+            self.handset.set_volume(0.75)
 
     def stop(self):
         self.kill_ringer()
@@ -78,21 +77,9 @@ class Phone:
         self.leftRing.off()
 
     def call(self, number):
-        if(self.phonebook.does_contact_exist(number)):
-            contact = self.phonebook.get_contact_by_number(number)
-            log.info("contact exists, dialing " + str(contact))
-        else:
-            contact = self.phonebook.get_random_contact()
-            log.info("contact doesnt exist, dialing " + str(contact))
-
-        log.info("calling " + str(contact))
+        log.info("calling " + str(number))
         self.dial.cancel_dial_timer()
-        self.handset.ring()
-        contact.dial()
         
-    def reset_tardis(self):
-        log.debug("Resetting phone")
-        self.kill_ringer()
 
     def cb_off_hook(self, cb):
         log.debug("Phone off hook")
