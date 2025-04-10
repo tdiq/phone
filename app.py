@@ -1,7 +1,8 @@
 import time
 import sys
 import logging
-import os # <<< Import os
+import os
+import signal
 
 #using pygame for audio and events
 os.environ['SDL_VIDEODRIVER'] = 'dummy'
@@ -14,6 +15,9 @@ log = logging.getLogger("app")
 
 CTRL_PC_ADDRESS="10.0.0.45"
 # CTRL_PC_ADDRESS="192.168.0.20"
+
+# This allows the signal handler to access it for cleanup.
+tdiq_phone_instance = None
 
 class TDIQPhone:
     def __init__(self):
@@ -31,7 +35,7 @@ class TDIQPhone:
             log.info("phone picked up")
             self.osc.send("/props/phone/pickup", 1)
 
-            intro_audio = "assets/dialogue/1_child_have-to-whisper.wav" 
+            intro_audio = "assets/dialogue/1_child_have-to-whisper.wav"
             self.phone.handset.play_and_listen(
                 filename=intro_audio,
                 on_speech_detected_cb=self.handle_user_spoke,
@@ -39,16 +43,14 @@ class TDIQPhone:
                 listen_duration=4, # seconds
                 silence_threshold=1000 # threshold for speech detection
             )
-            
-#WIP - we should probably figure out a way to pass the silence/speech detection status via the callback
+
+ # WIP - we should probably figure out a way to pass the silence/speech detection status via the callback
     def handle_user_spoke(self):
         log.info("User spoke after the prompt!")
         self.osc.send("/props/phone/user_spoke", 1)
-        self.phone.handset.play_file("assets/dialogue/2-you-remember-dont-you.wav") #make this an LLM response? or just precook a bunch of random stuff?
+        self.phone.handset.play_file("assets/dialogue/2-you-remember-dont-you.wav")
         self.phone.handset.play_file("assets/dialogue/3-happy-birthday-spell.wav")
         self.phone.handset.play_file("assets/dialogue/4-always-listening.wav")
-
-
 
     def handle_user_silent(self):
         log.info("User was silent after the prompt.")
@@ -57,12 +59,9 @@ class TDIQPhone:
         self.phone.handset.play_file("assets/dialogue/3-happy-birthday-spell.wav")
         self.phone.handset.play_file("assets/dialogue/4-always-listening.wav")
 
-#WIP
-
     def on_hang_up_phone(self):
         log.info("phone hung up")
         self.osc.send("/props/phone/hangup", 1)
-
 
     def on_start_msg(self, address, value):
         log.info("received message to start")
@@ -70,27 +69,42 @@ class TDIQPhone:
 
     def stop(self):
         log.info("Safely shutting down tdiq phone...")
-        self.phone.stop() 
         if hasattr(self, 'osc') and self.osc:
              self.osc.stop_server()
+             log.info("OSC server stopped.")
+        if hasattr(self, 'phone') and self.phone:
+            self.phone.stop()
+            log.info("Phone resources released.")
+        log.info("Shutdown tasks complete.")
+
+
+def shutdown_handler(signum, frame):
+    """Gracefully shut down the application upon receiving SIGTERM or SIGINT."""
+    log.warning("Received signal {}. Initiating shutdown...".format(signum))
+    if tdiq_phone_instance:
+        tdiq_phone_instance.stop()
+    else:
+        log.warning("Application instance not found for cleanup.")
+    log.warning("Exiting application.")
+    sys.exit(0) 
 
 
 if __name__ == "__main__":
-    tardis = None # Define tardis outside try so finally block can access it
-    try:
-        tardis = TDIQPhone()
-        log.info("Application running. Press Ctrl+C to exit.")
-        while True:
-            # Main loop could potentially check thread health or do other tasks
-            time.sleep(1)
+    signal.signal(signal.SIGTERM, shutdown_handler)
+    signal.signal(signal.SIGINT, shutdown_handler)
 
-    except KeyboardInterrupt:
-        log.info("Ctrl+C received. Shutting down.")
-        if tardis:
-            tardis.stop()
-        sys.exit(0)
+    try:
+        # Assign the instance to the global variable
+        tdiq_phone_instance = TDIQPhone()
+        log.info("Application running. Waiting for signals (e.g., SIGTERM from systemctl stop)...")
+
+        # Keep the main thread alive. signal.pause() waits efficiently for signals.
+        while True:
+            signal.pause() # Wait here until a signal is received and handled
+
     except Exception as e:
-        log.error("An unexpected error occurred: {}".format(e), exc_info=True)
-        if tardis:
-             tardis.stop() # Attempt cleanup even on other errors
-        sys.exit(1) # Exit with error code
+        log.error("An unexpected critical error occurred: {}".format(e), exc_info=True)
+        if tdiq_phone_instance:
+             log.info("Attempting emergency cleanup...")
+             tdiq_phone_instance.stop()
+        sys.exit(1)
