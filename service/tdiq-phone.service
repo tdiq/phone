@@ -1,0 +1,33 @@
+[Unit]
+Description=TDIQ Phone
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+# --- Configuration ---
+User=pi
+Group=pi
+WorkingDirectory=/home/pi
+ExecStart=/home/pi/start-phone # CHANGE THIS: Absolute path to the helper script above
+# ---------------------
+
+# Run the script as the main process
+Type=simple
+
+# Restart the service if it exits due to an error (non-zero exit code)
+Restart=on-failure
+
+# Wait 5 seconds before attempting to restart
+RestartSec=5s
+
+# Optional: Set environment variables for your Python application if needed
+# Environment="DATABASE_URL=your_db_connection_string"
+# Environment="API_KEY=your_api_key"
+
+# Logging: Standard output and error will be directed to the systemd journal
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+# Enable the service to start automatically at boot in the standard multi-user environment
+WantedBy=multi-user.target

@@ -1,0 +1,54 @@
+#!/bin/bash
+
+# --- Configuration ---
+APP_DIR="/home/pi/tdiq-phone"
+GIT_REMOTE="origin"
+GIT_BRANCH="main"
+VENV_DIR="venv"
+PYTHON_SCRIPT="app.py"
+# ---------------------
+
+# Exit immediately if any command fails
+set -e
+
+echo "Navigating to $APP_DIR"
+cd "$APP_DIR" || { echo "Failed to cd into $APP_DIR"; exit 1; }
+
+#echo "Stashing any local changes (including untracked files)..."
+# Stash any local changes (staged, unstaged, and untracked)
+# Using 'git stash save' for compatibility with older Git versions.
+# The '-u' includes untracked files. The message helps identify the stash.
+#STASH_MSG="Auto-stash before service start: $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+#git stash save -u "$STASH_MSG"
+#echo "Local changes stashed (if any)."
+
+#echo "Fetching latest changes from $GIT_REMOTE..."
+# Fetch the latest updates from the remote repository without merging
+#git fetch "$GIT_REMOTE"
+
+echo "Forcefully resetting local repository to match $GIT_REMOTE/$GIT_BRANCH..."
+# Reset the local branch and working directory to match the fetched remote state.
+# Since local changes were stashed, this ensures the code matches the remote branch.
+git reset --hard "$GIT_REMOTE/$GIT_BRANCH"
+echo "Local repository reset to $GIT_REMOTE/$GIT_BRANCH."
+
+
+# Activate the virtual environment
+VENV_ACTIVATE_PATH="$VENV_DIR/bin/activate"
+if [ -f "$VENV_ACTIVATE_PATH" ]; then
+  echo "Activating virtual environment: $VENV_ACTIVATE_PATH"
+  source "$VENV_ACTIVATE_PATH"
+else
+  echo "Error: Virtual environment activation script not found at $VENV_ACTIVATE_PATH"
+  exit 1
+fi
+
+echo "Starting Python application: $PYTHON_SCRIPT"
+# Execute the Python script.
+# 'exec' replaces the shell process with the python process.
+# If python exits with an error, systemd will see the service as failed.
+exec python "$PYTHON_SCRIPT"
+
+# The script will only reach here if 'exec python' fails immediately (e.g., script not found)
+echo "Error: Failed to execute python $PYTHON_SCRIPT"
+exit 1
