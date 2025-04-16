@@ -27,7 +27,7 @@ class Phone:
         #cb_dial_number dialer calls this function when user has finished dialing
         #cb_got_digit dialer calls function when user has dialed first digit
 
-        self.hookswitch = gpiozero.Button(pin=PIN_HOOKSWITCH, pull_up=True, bounce_time=0.05)
+        self.hookswitch = gpiozero.Button(pin=PIN_HOOKSWITCH, pull_up=True)
         self.hookswitch.when_pressed = lambda: (
             log.debug("Phone off hook"),
             self.handset.off_hook(),    
