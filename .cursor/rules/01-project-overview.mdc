@@ -1,0 +1,28 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# TDIQ Phone Project Overview
+
+This is a Python-based interactive phone prop system that combines hardware control with audio playback and speech detection capabilities. The system uses OSC (Open Sound Control) for communication with a control PC.
+
+## Main Components
+
+- [app.py](mdc:app.py): The main entry point and application controller
+- [modules/Phone.py](mdc:modules/Phone.py): Core phone hardware control
+- [modules/Handset.py](mdc:modules/Handset.py): Handles audio playback and recording
+- [modules/RotaryDial.py](mdc:modules/RotaryDial.py): Controls rotary dial functionality
+- [modules/OSC.py](mdc:modules/OSC.py): Manages OSC communication
+
+## Key Features
+
+1. Phone hardware control (pickup/hangup detection)
+2. Audio playback and recording
+3. Speech detection during playback
+4. OSC communication with control PC
+5. Rotary dial input processing
+
+## Configuration
+
+The system connects to a control PC at a configured IP address (default: 10.0.0.45) and uses various audio assets stored in the assets directory for playback.

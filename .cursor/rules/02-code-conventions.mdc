@@ -1,0 +1,27 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Code Conventions and Patterns
+
+## Class Structure
+- Classes use PascalCase naming (e.g., `TDIQPhone`, `Phone`, `OSCHandler`)
+- Instance methods use snake_case (e.g., `on_pick_up_phone`, `handle_user_spoke`)
+- Callback methods are typically prefixed with `on_` or `handle_`
+
+## Error Handling
+- Critical operations are wrapped in try-except blocks
+- Graceful shutdown handlers are implemented for SIGTERM and SIGINT
+- Logging is used extensively for debugging and monitoring
+
+## Dependencies
+- Core dependencies are managed in [requirements.txt](mdc:requirements.txt)
+- External dependencies include:
+  - pygame for audio handling
+  - python-osc for OSC communication
+
+## Resource Management
+- Hardware resources are properly initialized and cleaned up
+- Audio files are stored in the assets directory
+- Configuration values are defined at the module level

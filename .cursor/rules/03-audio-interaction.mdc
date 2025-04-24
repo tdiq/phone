@@ -1,0 +1,32 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Audio and Interaction Flow
+
+## Audio System
+- Audio handling is primarily managed in [modules/Handset.py](mdc:modules/Handset.py)
+- Audio files are played sequentially based on user interactions
+- Speech detection is performed during specific audio playback segments
+
+## Interaction Sequence
+1. System starts and waits for OSC `/props/phone/start` message
+2. Phone rings once when start message is received
+3. When handset is picked up:
+   - System sends `/props/phone/pickup` OSC message
+   - Plays introduction audio
+   - Listens for user response
+4. Based on user's speech/silence:
+   - Sends appropriate OSC message (`/props/phone/user_spoke` or `/props/phone/user_silent`)
+   - Plays subsequent audio files in sequence
+5. When handset is hung up:
+   - Sends `/props/phone/hangup` OSC message
+   - Stops any ongoing audio playback
+
+## Audio Assets
+Audio files are stored in `assets/dialogue/` with numbered prefixes indicating playback order:
+- 1_child_have-to-whisper.wav
+- 2-you-remember-dont-you.wav
+- 3-happy-birthday-spell.wav
+- 4-always-listening.wav
