@@ -5,3 +5,4 @@ PyAudio==0.2.11
 pygame==1.9.3
 python-osc==1.8.1
 RPi.GPIO==0.7.1
+pyserial==3.5
