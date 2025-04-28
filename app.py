@@ -9,6 +9,8 @@ os.environ['SDL_VIDEODRIVER'] = 'dummy'
 
 from modules.Phone import Phone
 from modules.OSC import OSCHandler
+from modules.ArtNet import ArtNetClient
+from modules.Serial import Serial
 
 logging.basicConfig(level=os.environ.get("LOGLEVEL", "DEBUG"))
 log = logging.getLogger("app")
@@ -28,7 +30,10 @@ class TDIQPhone:
         self.osc = OSCHandler(send_ip=CTRL_PC_ADDRESS)
         self.osc.subscribe("/props/phone/start", self.on_start_msg)
         self.osc.start_server()
-
+        self.artnet = ArtNetClient(target_ip="192.168.0.10", universe=0)
+        serial = Serial(port_pattern='USB Serial', baud_rate=9600)
+        time.sleep(1)  # Wait for the serial connection to stabilize
+        serial.light_on()
         log.info("Initialization complete")
 
     def on_pick_up_phone(self):
