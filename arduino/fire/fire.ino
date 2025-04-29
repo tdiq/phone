@@ -32,7 +32,7 @@ void setup() {
   fill_solid_rgbw(CRGB::Green);
   FastLED.show();
   testLEDS();
-  currentMode = FIRE_ON
+  currentMode = FIRE_ON;
   Serial.println("Ready for blinkenlights");
 }
 
