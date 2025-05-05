@@ -39,30 +39,7 @@ class TDIQPhone:
     def on_pick_up_phone(self):
             log.info("phone picked up")
             self.osc.send("/props/phone/pickup", 1)
-
-            intro_audio = "assets/dialogue/1_child_have-to-whisper.wav"
-            self.phone.handset.play_and_listen(
-                filename=intro_audio,
-                on_speech_detected_cb=self.handle_user_spoke,
-                on_silence_detected_cb=self.handle_user_silent,
-                listen_duration=4, # seconds
-                silence_threshold=1000 # threshold for speech detection
-            )
-
- # WIP - we should probably figure out a way to pass the silence/speech detection status via the callback
-    def handle_user_spoke(self):
-        log.info("User spoke after the prompt!")
-        self.osc.send("/props/phone/user_spoke", 1)
-        self.phone.handset.play_file("assets/dialogue/2-you-remember-dont-you.wav")
-        self.phone.handset.play_file("assets/dialogue/3-happy-birthday-spell.wav")
-        self.phone.handset.play_file("assets/dialogue/4-always-listening.wav")
-
-    def handle_user_silent(self):
-        log.info("User was silent after the prompt.")
-        self.osc.send("/props/phone/user_silent", 1)
-        self.phone.handset.play_file("assets/dialogue/2-you-remember-dont-you.wav")
-        self.phone.handset.play_file("assets/dialogue/3-happy-birthday-spell.wav")
-        self.phone.handset.play_file("assets/dialogue/4-always-listening.wav")
+            self.phone.handset.play_file("assets/dialogue/call.wav")
 
     def on_hang_up_phone(self):
         self.osc.send("/props/phone/hangup", 1)
