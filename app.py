@@ -15,10 +15,10 @@ from modules.Serial import Serial
 logging.basicConfig(level=os.environ.get("LOGLEVEL", "DEBUG"))
 log = logging.getLogger("app")
 
-CTRL_PC_ADDRESS="10.0.0.45"
-# CTRL_PC_ADDRESS="192.168.0.20"
+CTRL_PC_ADDRESS="192.168.0.20"
+DMX_TO_ARTNET_ADDRESS="192.168.0.10"
+SMOKE_MACHINE_DMX_ADDRESS = 450
 
-# This allows the signal handler to access it for cleanup.
 tdiq_phone_instance = None
 
 class TDIQPhone:
@@ -30,16 +30,19 @@ class TDIQPhone:
         self.osc = OSCHandler(send_ip=CTRL_PC_ADDRESS)
         self.osc.subscribe("/props/phone/start", self.on_start_msg)
         self.osc.start_server()
-        self.artnet = ArtNetClient(target_ip="192.168.0.10", universe=0)
-        serial = Serial(port_pattern='USB Serial', baud_rate=9600)
-        time.sleep(1)  # Wait for the serial connection to stabilize
-        serial.light_on()
+        self.artnet = ArtNetClient(target_ip=DMX_TO_ARTNET_ADDRESS, universe=0)
         log.info("Initialization complete")
 
     def on_pick_up_phone(self):
             log.info("phone picked up")
             self.osc.send("/props/phone/pickup", 1)
             self.phone.handset.play_file("assets/dialogue/call.wav")
+            log.info("smokin meats")
+            self.artnet.send_value(channel=SMOKE_MACHINE_DMX_ADDRESS, value=30)
+            time.sleep(0.75)
+            log.info("done smokin em")
+            self.artnet.send_value(channel=SMOKE_MACHINE_DMX_ADDRESS, value=0)
+
 
     def on_hang_up_phone(self):
         self.osc.send("/props/phone/hangup", 1)
@@ -56,6 +59,9 @@ class TDIQPhone:
         if hasattr(self, 'phone') and self.phone:
             self.phone.stop()
             log.info("Phone resources released.")
+        
+        self.artnet.send_value(channel=SMOKE_MACHINE_DMX_ADDRESS, value=0)
+
         log.info("Shutdown tasks complete.")
 
 
