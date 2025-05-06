@@ -32,53 +32,16 @@ class RotaryDial:
 
   #If digit meets MAX_DIAL_DIGIT length, call number. Otherwise reset dial timer.
     def got_digit(self, digit):
-        #nfi why this is off by one
-        if(digit != 9): 
-            digit += 1 
-        elif(digit == 10):
-            digit = 0
-        self.current_number += str(digit)
-        log.debug("Got digit " + str(digit) + ". Current number is " + str(self.current_number) )
-
-        if len(self.current_number) == 1:
-            self.cb_got_digit() #let phone know we got a digit, used for controlling ringtone
-
-        if len(self.current_number) == MAX_DIAL_DIGITS:
-            log.info("Dialed max number of digits. Dialing number " + str(self.current_number))
-            self.cb_dial_number(self.current_number)
-            self.current_number = ""
-            self.dialTimer.cancel()
-        else:
-            self.cancel_dial_timer()
-
-            self.dialTimer = Timer(DIGIT_TIMEOUT, self.cb_dial_timer)
-            self.dialTimer.start()
+        log.debug("got digit")
+        return
 
 
     def cb_dial_triggered(self):
-        log.debug("dial triggered")
-        while self.dial.is_pressed:
-            last_dial_state = True
-        
-        # Wait for dialling to complete
-        current_digit = 0
-        last_timestamp = time.time()
-        while (time.time() - last_timestamp) < 0.3:
-            current_dial_state = self.dial.is_pressed
-            if not current_dial_state and last_dial_state == True:
-                current_digit = current_digit + 1
-                last_timestamp = time.time()
-                
-            last_dial_state = current_dial_state
-        if current_digit == 10:
-            current_digit = 0
-        self.got_digit(current_digit)
+        log.debug("ignoring dial trigger")
 
 
     def cb_dial_timer(self):
-        log.debug("Dial timer elapsed. Calling " + str(self.current_number))
-        self.cb_dial_number(self.current_number) #this is the callback set by app.py
-        self.current_number = ""
+        log.debug("Dial timer elapsed")
 
     def cancel_dial_timer(self):
         log.debug("Cancelling dial timer")
