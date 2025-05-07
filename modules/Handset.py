@@ -110,6 +110,30 @@ class Handset:
             log.error("Error playing sound file {}: {}".format(filename, e))
             return False
 
+    def loop_file(self, filename):
+        """Plays a file on loop non-blockingly. Stops previous sound on the channel."""
+        if not self.audioChannel:
+            log.error("Audio channel not initialized. Cannot loop file.")
+            return False
+        log.info("Looping file: {}".format(filename))
+        try:
+            s = mixer.Sound(filename)
+            s.set_volume(self.soundVolume)
+            self.audioChannel.stop() # Stop previous sound first
+            self.audioChannel.play(s, loops=-1) # loops=-1 means infinite loop
+            return True
+        except pygame.error as e:
+            log.error("Error looping sound file {}: {}".format(filename, e))
+            return False
+
+    def stop_loop(self):
+        """Stops any currently playing/looping sound on the audio channel."""
+        if not self.audioChannel:
+            log.error("Audio channel not initialized. Cannot stop loop.")
+            return
+        log.info("Stopping looped file.")
+        self.audioChannel.stop()
+
     # ... ( speak method remains the same ) ...
     def speak(self, text, cb=None, sleep=0):
         """Uses espeak TTS in a background thread."""
@@ -315,7 +339,7 @@ class Handset:
         if not self.onHook:
              log.info("Phone HUNG UP")
              self.onHook = True
-             if self.audioChannel: self.audioChannel.stop()
+             if self.audioChannel: self.audioChannel.stop() # This will stop loops too
 
     # ... ( off_hook method remains the same ) ...
     def off_hook(self):

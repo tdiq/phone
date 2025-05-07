@@ -31,21 +31,23 @@ class TDIQPhone:
         self.osc.subscribe("/props/phone/start", self.on_start_msg)
         self.osc.start_server()
         self.artnet = ArtNetClient(target_ip=DMX_TO_ARTNET_ADDRESS, universe=0)
+        self.phone.handset.loop_file("assets/dialogue/call2.wav")
         log.info("Initialization complete")
 
     def on_pick_up_phone(self):
             log.info("phone picked up")
             self.osc.send("/props/phone/pickup", 1)
-            self.phone.handset.play_file("assets/dialogue/call.wav")
-            log.info("smokin meats")
-            self.artnet.send_value(channel=SMOKE_MACHINE_DMX_ADDRESS, value=30)
-            time.sleep(0.75)
-            log.info("done smokin em")
-            self.artnet.send_value(channel=SMOKE_MACHINE_DMX_ADDRESS, value=0)
+            # self.phone.handset.loop_file("assets/dialogue/call2.wav")
+            # log.info("smokin meats")
+            # self.artnet.send_value(channel=SMOKE_MACHINE_DMX_ADDRESS, value=30)
+            # time.sleep(0.75)
+            # log.info("done smokin em")
+            # self.artnet.send_value(channel=SMOKE_MACHINE_DMX_ADDRESS, value=0)
 
 
     def on_hang_up_phone(self):
         self.osc.send("/props/phone/hangup", 1)
+        self.phone.handset.stop_loop()
 
     def on_start_msg(self, address, value):
         log.info("received message to start")
